@@ -2,7 +2,7 @@ from flask import Flask, render_template
 StudentInfoPage = Flask(__name__)
 @StudentInfoPage.route('/')
 
-def loadSInfoPage():
+def loadSInfoPage ():
     return render_template("sinfo.html")
 
 
