@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash
+from flask import Flask, render_template, flash, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, Text
 from sqlalchemy_utils import database_exists, create_database
@@ -8,6 +8,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, PasswordField, BooleanField, ValidationError
 from wtforms.validators import DataRequired, EqualTo, Length
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 
 
@@ -32,6 +33,15 @@ if not database_exists(engine.url):
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 #Database models scroll to bottom
+#Login stuff
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'loadLogin'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
 #Form classes
 class RegUserForm(FlaskForm):
     username = StringField("Please enter a Username", validators=[DataRequired()])
@@ -39,11 +49,39 @@ class RegUserForm(FlaskForm):
     hashed_password2 = PasswordField('Confirm Password', validators=[DataRequired()])
     register = SubmitField("Register")
 
-@app.route('/')
+class updateUserForm(FlaskForm):
+    username = StringField("Please enter Username", validators=[DataRequired()])
+    hashed_password = PasswordField('Password', validators=[DataRequired(), EqualTo("hashed_password2", message='Passwords must match')])
+    hashed_password2 = PasswordField('Confirm Password', validators=[DataRequired()])
+    update = SubmitField("Update")
+
+@app.route('/', methods=['GET', 'POST'])
 def loadLogin():
+    username = ''
+    password = ''
+    if request.method == "POST":
+        username = request.form['UN']
+        password = request.form['password']
+        user=Users.query.filter_by(username=username).first()
+        if user:
+            if check_password_hash(user.hashed_password, password):
+                login_user(user)
+                return redirect(url_for('loadmain'))
+            else:
+                flash("Wrong Password")
+        else:
+            flash("User don't exist")
     return render_template("index.html")
 
+@app.route('/logout', methods=["GET","POST"])
+@login_required
+def logout():
+    logout_user()
+    flash("Logged out")
+    return redirect(url_for('loadLogin'))
+
 @app.route('/mainpage.html')
+@login_required
 def loadmain():
     #retrieve user data from db and put username on the mainpage
     return render_template("mainpage.html")
@@ -69,6 +107,7 @@ def loadGenReportPage():
     return render_template("reportgen.html")
 
 @app.route('/add_user.html', methods=['GET', 'POST'])
+@login_required
 def add_user():
     form = RegUserForm()
     if form.validate_on_submit():
@@ -85,12 +124,48 @@ def add_user():
     our_users = Users.query.order_by(Users.date_added)
     return render_template('add_user.html', form = form, our_users = our_users)
 
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+@login_required
+def UpdateUser(id):
+    form=updateUserForm()
+    NameToUpdate = Users.query.get_or_404(id)
+    our_users = Users.query.order_by(Users.date_added)
+    if request.method == "POST":
+        NameToUpdate.username = request.form['username']
+        NameToUpdate.hashed_password = generate_password_hash(request.form['hashed_password'])
+        try:
+            db.session.commit()
+            flash("User updated")
+            return render_template("update.html", form = form, NameToUpdate = NameToUpdate, our_users = our_users)
+        except:
+            flash("Error, user is not updated")
+            return render_template("update.html", form = form, NameToUpdate = NameToUpdate, our_users = our_users)
+    else:
+        return render_template("update.html", form = form, NameToUpdate = NameToUpdate, our_users = our_users)
+
+
+@app.route('/delete/<int:id>')
+@login_required
+def delete(id):
+    form = RegUserForm()
+    UserToDelete = Users.query.get_or_404(id)
+    try:
+        db.session.delete(UserToDelete)
+        db.session.commit()
+        flash("User deleted")
+        our_users = Users.query.order_by(Users.date_added)
+        return render_template('add_user.html', form = form, our_users = our_users)
+    except:
+        flash("Error in deleting")
+        return render_template('add_user.html', form = form, our_users = our_users)
+
+
 if __name__ == '__main__':
     app.run(port=5000)
 
 #Database models
 #Users table
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(64), nullable = False, unique = True)
     hashed_password = db.Column(db.String(200), nullable = False) #need to add hashpw later
@@ -160,7 +235,8 @@ class Grade_remark(db.Model):
     remark_id = db.Column(db.Integer, db.ForeignKey('remarks.id'), nullable=False)
     grade = db.Column(db.Float)
 
-#if True:
-    #db.create_all()
+#if True: #This line is for testing purposes
 if FirstTimeConnectionToDatabase:
     db.create_all()
+    Users(username='admin', hashed_password=generate_password_hash(password))
+    db.session.commit()
