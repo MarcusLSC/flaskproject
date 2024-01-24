@@ -213,12 +213,13 @@ class Classes(db.Model):
 class Students(db.Model):
     sid = db.Column(db.String(100), primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    student_class = db.Column(db.Integer, db.ForeignKey('classes.id'))
+    student_class = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=False)
     dob = db.Column(db.DateTime)
     absentdays = db.Column(db.Integer, default=0)
     latedays = db.Column(db.Integer, default=0)
     teachercomment = db.Column(Text)
-
+    grade_a = db.relationship('Grade_assessment', backref='student', lazy=True)
+    grade_r = db.relationship('Grade_remark', backref='student', lazy=True)
 #grade tables
 class Grade_assessment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
