@@ -168,7 +168,7 @@ if __name__ == '__main__':
 class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(64), nullable = False, unique = True)
-    hashed_password = db.Column(db.String(200), nullable = False) #need to add hashpw later
+    hashed_password = db.Column(db.String(200), nullable = False) 
     date_added = db.Column(db.DateTime, default = datetime.utcnow)
 
     @property
@@ -188,52 +188,54 @@ class Users(db.Model, UserMixin):
 class Subjects(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    remarks = db.relationship('Remarks', backref='subject', lazy=True)
-    assessments = db.relationship('Assessments', backref='subject', lazy=True)
+    remarks = db.relationship('Remarks', backref='subject', cascade='all, delete', lazy=True)
+    assessments = db.relationship('Assessments', backref='subject', cascade='all, delete', lazy=True)
 
 class Remarks(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id'), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id', ondelete='CASCADE'), nullable=False)
     content = db.Column(db.String(100), nullable=False)
-    assessments = db.relationship('Assessments', backref='remark',lazy=True)
+    assessments = db.relationship('Assessments', backref='remark', cascade='all, delete', lazy=True)
 
 class Assessments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id'), nullable=False)
-    remark_id = db.Column(db.Integer, db.ForeignKey('remarks.id'), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id', ondelete='CASCADE'), nullable=False)
+    remark_id = db.Column(db.Integer, db.ForeignKey('remarks.id', ondelete='CASCADE'), nullable=False)
     full_mark = db.Column(db.Integer, nullable=False, default=100)
     percentage_to_remark = db.Column(db.Float, nullable=False, default=100)
+    assessment_type = db.Column(db.String(100), nullable=False)
 
 #Student Info tables
 class Classes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    students = db.relationship('Students', backref='class', lazy=True)
+    students = db.relationship('Students', backref='class', cascade='all, delete', lazy=True)
 
 class Students(db.Model):
     sid = db.Column(db.String(100), primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    student_class = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=False)
+    student_class = db.Column(db.Integer, db.ForeignKey('classes.id', ondelete='CASCADE'), nullable=False)
     dob = db.Column(db.DateTime)
     absentdays = db.Column(db.Integer, default=0)
     latedays = db.Column(db.Integer, default=0)
     teachercomment = db.Column(Text)
-    grade_a = db.relationship('Grade_assessment', backref='student', lazy=True)
-    grade_r = db.relationship('Grade_remark', backref='student', lazy=True)
+    grade_a = db.relationship('Grade_assessment', backref='student', cascade='all, delete', lazy=True)
+    grade_r = db.relationship('Grade_remark', backref='student', cascade='all, delete', lazy=True)
+    
 #grade tables
 class Grade_assessment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    sid = db.Column(db.String(100), db.ForeignKey('students.sid') , nullable=False)
-    class_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=False)
-    assessment_id = db.Column(db.Integer, db.ForeignKey('assessments.id'), nullable=False)
+    sid = db.Column(db.String(100), db.ForeignKey('students.sid', ondelete='CASCADE') , nullable=False)
+    class_id = db.Column(db.Integer, db.ForeignKey('classes.id', ondelete='CASCADE'), nullable=False)
+    assessment_id = db.Column(db.Integer, db.ForeignKey('assessments.id', ondelete='CASCADE'), nullable=False)
     grade = db.Column(db.Float)
     transformedgrade = db.Column(db.Float)
 
 class Grade_remark(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    sid = db.Column(db.String(100), db.ForeignKey('students.sid'), nullable=False)
-    class_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=False)
-    remark_id = db.Column(db.Integer, db.ForeignKey('remarks.id'), nullable=False)
+    sid = db.Column(db.String(100), db.ForeignKey('students.sid', ondelete='CASCADE'), nullable=False)
+    class_id = db.Column(db.Integer, db.ForeignKey('classes.id', ondelete='CASCADE'), nullable=False)
+    remark_id = db.Column(db.Integer, db.ForeignKey('remarks.id', ondelete='CASCADE'), nullable=False)
     grade = db.Column(db.Float)
 
 #if True: #This line is for testing purposes

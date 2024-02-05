@@ -48,7 +48,7 @@
     {%for our_user in our_users %}
         <tr>
             <td>
-                {{our_user.id}} - <a href ='{{url_for("UpdateUser", id = our_user.id)}}'>{{our_user.username}}</a> - {{our_user.date_added}} - <a href ='{{url_for("delete", id = our_user.id)}}'>Delete</a>
+                {{our_user.id}} - <a href ='{{url_for("UpdateUser", id = our_user.id)}}'>{{our_user.username}}</a> - {{our_user.date_added}} - <a href ='{{url_for("delete", id = our_user.id)}}'>Delete</a><br/>
             </td>
         </tr>
     {%endfor%}
