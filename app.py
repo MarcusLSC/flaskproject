@@ -55,6 +55,20 @@ class updateUserForm(FlaskForm):
     hashed_password2 = PasswordField('Confirm Password', validators=[DataRequired()])
     update = SubmitField("Update")
 
+def get_SubjectChoices_from_database():
+    subjects = Subjects.query.order_by(Subjects.id).all()
+    choices = [(subject.id, subject.name) for subject in subjects]
+    return choices
+
+class SelectSubjectForm(FlaskForm):
+    SubjectSelect = SelectField('Select a Subject: ')
+    
+    def update_choices(self):
+        self.SubjectSelect.choices = get_SubjectChoices_from_database()
+
+class SubjectForm(FlaskForm):
+        SubjectName = StringField("Subject Name: ", validators=[DataRequired()])
+
 @app.route('/', methods=['GET', 'POST'])
 def loadLogin():
     username = ''
@@ -96,7 +110,23 @@ def loadScoreEntryPage():
 
 @app.route('/subject.html')
 def loadSubjectPage():
-    return render_template("subject.html")
+    form1 = SelectSubjectForm()
+    form1.update_choices()
+    form2 = SubjectForm()
+    RequiredSubject = None
+    if form1.validate_on_submit():
+        selected_subject = form1.SubjectSelect.data
+    
+        if selected_subject == 'new':
+            # Handle the case where the user wants to create a new subject
+            # Redirect to a form for creating a new subject
+            return render_template("subject.html",form1=form1,form2=form2)
+        else:
+            RequiredSubject = selected_subject
+            InfoforRemark = Remarks.query.filter_by(subject_id=RequiredSubject.id).order_by(Remarks.id)
+            InfoforAssessment = Assessments.query.filter_by(subject_id=RequiredSubject.id).order_by(Assessments.id)
+            return render_template("subject.html",form1=form1,form2=form2)
+    return render_template("subject.html",form1=form1,form2=form2)
 
 @app.route('/statistics.html')
 def loadStatisticsPage():

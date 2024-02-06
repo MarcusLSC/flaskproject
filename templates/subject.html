@@ -5,7 +5,63 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="generator" content="RocketCake">
 	<title></title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="/static/styles/subject_html.css">
+	<script>
+		function addTextbox() {
+      var container = document.getElementById("remarkContainer");
+      var input = document.createElement("input");
+      input.type = "text";
+      input.name = "remarks[]";
+      input.placeholder = "Enter remark";
+      container.appendChild(input);
+
+      var deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.innerHTML = "Delete";
+      deleteButton.onclick = function() {
+        removeTextbox(input);
+      };
+      container.appendChild(deleteButton);
+
+      var lineBreak1 = document.createElement("br");
+      container.appendChild(lineBreak1);
+
+      var lineBreak2 = document.createElement("br");
+      container.appendChild(lineBreak2);
+    }
+
+    function removeTextbox(input) {
+      var container = document.getElementById("remarkContainer");
+      container.removeChild(input.nextSibling); // Remove the delete button
+      container.removeChild(input.nextSibling); // Remove the first line break
+      container.removeChild(input.nextSibling); // Remove the second line break
+      container.removeChild(input); // Remove the input element
+    }
+	
+		function addRow(tableId) {
+		  var table = document.getElementById(tableId);
+		  var row = table.insertRow(-1);
+	
+		  var cell1 = row.insertCell(0);
+		  var cell2 = row.insertCell(1);
+		  var cell3 = row.insertCell(2);
+		  var cell4 = row.insertCell(3);
+		  var cell5 = row.insertCell(4);
+	
+		  cell1.innerHTML = '<input type="text" name="' + tableId + 'Name[]" required>';
+		  cell2.innerHTML = '<input type="text" name="' + tableId + 'RelationWithRemark[]" required>';
+		  cell3.innerHTML = '<input type="number" name="' + tableId + 'FullMark[]" required>';
+		  cell4.innerHTML = '<input type="number" name="' + tableId + 'Contribution[]" required>';
+		  cell5.innerHTML = '<button type="button" onclick="removeRow(this)">Remove</button>';
+		}
+	
+		function removeRow(button) {
+		  var row = button.parentNode.parentNode;
+		  var table = row.parentNode.parentNode;
+		  table.deleteRow(row.rowIndex);
+		}
+	  </script>
 </head>
 <body>
 <table>
@@ -13,16 +69,137 @@
 <div id="container_3a151bc"><div id="container_3a151bc_padding" ><div class="textstyle1">  <span class="textstyle2">&#31185;&#30446;</span>
 </div>
 </div></div><span class="textstyle3"><br/></span><div id="container_7e822e07"><div id="container_7e822e07_padding" ><div class="textstyle1">  <span class="textstyle4">lorem ipsum</span>
-</div><tr><td style="width: 150px;">
+</div><tr><td style="width: 150px;vertical-align:top">
 </div></div><span class="textstyle3"></span><div id="container_6e2ba9d9"><div id="container_6e2ba9d9_padding" ><div class="textstyle1">  <span class="textstyle3">&#31649;&#29702;</span>
 </div>
 </div></div><span class="textstyle3"><br/></span><div id="container_2aa5a736"><div id="container_2aa5a736_padding" ><div class="textstyle1"><span class="textstyle3"><a href="subject.html">&#31185;&#30446;</a><br/></span><span class="textstyle3"><a href="sinfo.html"><br/>&#23416;&#29983;&#36039;&#26009;</a></span><span class="textstyle3"><br/><br/></span><span class="textstyle3"><a href="scoreentry.html">&#20837;&#20998;</a></span><span class="textstyle3"><br/><br/></span><span class="textstyle3"><a href="reportgen.html">&#20986;&#35413;&#20272;&#34920;</a></span><span class="textstyle3"><br/></span><span class="textstyle3"><a href="statistics.html"><br/>&#32113;&#35336;</a></span></div>
 </div></div>
-</div></div>  </div></td><td>Subject
+</div></div>  </div></td><td><div class="container"><br><h1>Subject</h1>
 	<br/><br/>
+	<form id="form1" method="POST">
+		{{form1.hidden_tag()}}
+		<!-- Form1 fields and elements -->
+		<select id="selectField" name="selectField" onchange="this.form.submit()">
+			{% for subject in subjects %}
+				<option value="{{ subject.id }}">{{ subject.name }}</option>
+			{% endfor %}
+			<option value="new">Create New Subject</option>
+		</select>
+	</form>
+	<br/>
+	<div class="container">
+	<form id="form2" method="POST">
+		{{form2.hidden_tag()}}
+		{{form2.SubjectName.label}}
+		{{form2.SubjectName()}}
+		<br><h2>Remarks Section</h2>
+	<div id="remarkContainer">
+		<input type="text" name="remarks[]" value="Default remark" required>
+		<button type="button" onclick="removeTextbox(this.previousSibling)">Delete</button>
+		<br><br> <!-- Line break -->
+	  </div>
+	  <button type="button" onclick="addTextbox()">Add Remark</button>
+  <br><h2>Assignment Section</h2>
+  <table id="assignmentTable">
+    <thead>
+      <tr>
+        <th>Assignment Name</th>
+        <th>Relation with Remark</th>
+        <th>Assignment Full Mark</th>
+        <th>Percentage Contribution</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="text" name="assignmentName[]" required></td>
+        <td><input type="text" name="assignmentRelationWithRemark[]" required></td>
+        <td><input type="number" name="assignmentFullMark[]" required></td>
+        <td><input type="number" name="assignmentContribution[]" required></td>
+        <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <button type="button" onclick="addRow('assignmentTable')">Add Assignment</button>
 
+  <br><h2>Quizzes Section</h2>
+  <table id="quizzesTable">
+    <thead>
+      <tr>
+        <th>Quiz Name</th>
+        <th>Relation with Remark</th>
+        <th>Quiz Full Mark</th>
+        <th>Percentage Contribution</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="text" name="quizzesName[]" required></td>
+        <td><input type="text" name="quizzesRelationWithRemark[]" required></td>
+        <td><input type="number" name="quizzesFullMark[]" required></td>
+        <td><input type="number" name="quizzesContribution[]" required></td>
+        <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <button type="button" onclick="addRow('quizzesTable')">Add Quiz</button>
 
+  <br><h2>Examination Section</h2>
+  <table id="examinationTable">
+    <thead>
+      <tr>
+        <th>Exam Name</th>
+        <th>Relation with Remark</th>
+        <th>Exam Full Mark</th>
+        <th>Percentage Contribution</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="text" name="examinationName[]" required></td>
+        <td><input type="text" name="examinationRelationWithRemark[]" required></td>
+        <td><input type="number" name="examinationFullMark[]" required></td>
+        <td><input type="number" name="examinationContribution[]" required></td>
+        <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <button type="button" onclick="addRow('examinationTable')">Add Exam</button>
+
+  <br><h2>Others Section</h2>
+  <table id="othersTable">
+    <thead>
+      <tr>
+        <th>Other Name</th>
+        <th>Relation with Remark</th>
+        <th>Other Full Mark</th>
+        <th>Percentage Contribution</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="text" name="othersName[]" required></td>
+        <td><input type="text" name="othersRelationWithRemark[]" required></td>
+        <td><input type="number" name="othersFullMark[]" required></td>
+        <td><input type="number" name="othersContribution[]" required></td>
+        <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <button type="button" onclick="addRow('othersTable')">Add Other</button>
+
+  <br><br>
+  <input type="submit" value="Save">
+</form>
+</div></div>
+<br><p>
+	Note: The subjects will be displayed in the report in the order they are addded
+</p><br>
 	
 </td></tr></table>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>
