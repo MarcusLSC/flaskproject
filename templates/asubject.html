@@ -101,11 +101,13 @@
 		{{form2.SubjectName.label}}
 		{{form2.SubjectName()}}
 		<br><h2>Remarks Section</h2>
+        {%for remark in remarks%}
 	<div id="remarkContainer">
-		<input type="text" name="remarks[]" value="Default remark" required>
+		<input type="text" name="remarks[]" value="{{remark.content}}" required>
 		<button type="button" onclick="removeTextbox(this.previousSibling)">Delete</button>
 		<br><br> <!-- Line break -->
-	  </div>
+        {% endfor %}  
+    </div>
 	  <button type="button" onclick="addTextbox()">Add Remark</button>
   <br><h2>Assignment Section</h2>
   <table id="assignmentTable">
@@ -119,13 +121,17 @@
       </tr>
     </thead>
     <tbody>
+      {%for assessment in assessments%}
+      {%if assessment.assessment_type == "assignment"%}
       <tr>
-        <td><input type="text" name="assignmentName[]" required></td>
-        <td><input type="text" name="assignmentRelationWithRemark[]" required></td>
-        <td><input type="number" name="assignmentFullMark[]" required></td>
-        <td><input type="number" name="assignmentContribution[]" required></td>
+        <td><input type="text" name="assignmentName[]" value="{{assessment.name}}" required></td>
+        <td><input type="text" name="assignmentRelationWithRemark[]" value="{{assessment.remark_id.content}}" required></td>
+        <td><input type="number" name="assignmentFullMark[]" value="{{assessment.full_mark}}" required></td>
+        <td><input type="number" name="assignmentContribution[]" value="{{assessment.percentage_to_remark}}" required></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
+      {%endif%}
+      {%endfor%}
     </tbody>
   </table>
   <button type="button" onclick="addRow('assignmentTable')">Add Assignment</button>
@@ -133,6 +139,8 @@
   <br><h2>Quizzes Section</h2>
   <table id="quizzesTable">
     <thead>
+        {%for assessment in assessments%}
+      {%if assessment.assessment_type == "quiz"%}
       <tr>
         <th>Quiz Name</th>
         <th>Relation with Remark</th>
@@ -143,12 +151,14 @@
     </thead>
     <tbody>
       <tr>
-        <td><input type="text" name="quizzesName[]" required></td>
-        <td><input type="text" name="quizzesRelationWithRemark[]" required></td>
-        <td><input type="number" name="quizzesFullMark[]" required></td>
-        <td><input type="number" name="quizzesContribution[]" required></td>
+        <td><input type="text" name="quizzesName[]" value="{{assessment.name}}" required></td>
+        <td><input type="text" name="quizzesRelationWithRemark[]" value="{{assessment.remark_id.content}}" required></td>
+        <td><input type="number" name="quizzesFullMark[]" value="{{assessment.full_mark}}" required></td>
+        <td><input type="number" name="quizzesContribution[]" value="{{assessment.percentage_to_remark}}" required></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
+      {%endif%}
+      {%endfor%}
     </tbody>
   </table>
   <button type="button" onclick="addRow('quizzesTable')">Add Quiz</button>
@@ -165,13 +175,17 @@
       </tr>
     </thead>
     <tbody>
+        {%for assessment in assessments%}
+      {%if assessment.assessment_type == "exam"%}
       <tr>
-        <td><input type="text" name="examinationName[]" required></td>
-        <td><input type="text" name="examinationRelationWithRemark[]" required></td>
-        <td><input type="number" name="examinationFullMark[]" required></td>
-        <td><input type="number" name="examinationContribution[]" required></td>
+        <td><input type="text" name="examinationName[]" value="{{assessment.name}}" required></td>
+        <td><input type="text" name="examinationRelationWithRemark[]" value="{{assessment.remark_id.content}}" required></td>
+        <td><input type="number" name="examinationFullMark[]" value="{{assessment.full_mark}}" required></td>
+        <td><input type="number" name="examinationContribution[]" value="{{assessment.percentage_to_remark}}" required></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
+      {%endif%}
+      {%endfor%}
     </tbody>
   </table>
   <button type="button" onclick="addRow('examinationTable')">Add Exam</button>
@@ -179,6 +193,8 @@
   <br><h2>Others Section</h2>
   <table id="othersTable">
     <thead>
+        {%for assessment in assessments%}
+      {%if assessment.assessment_type == "other"%}
       <tr>
         <th>Other Name</th>
         <th>Relation with Remark</th>
@@ -189,12 +205,14 @@
     </thead>
     <tbody>
       <tr>
-        <td><input type="text" name="othersName[]" required></td>
-        <td><input type="text" name="othersRelationWithRemark[]" required></td>
-        <td><input type="number" name="othersFullMark[]" required></td>
-        <td><input type="number" name="othersContribution[]" required></td>
+        <td><input type="text" name="othersName[]" value="{{assessment.name}}" required></td>
+        <td><input type="text" name="othersRelationWithRemark[]" value="{{assessment.remark_id.content}}" required></td>
+        <td><input type="number" name="othersFullMark[]" value="{{assessment.full_mark}}" required></td>
+        <td><input type="number" name="othersContribution[]" value="{{assessment.percentage_to_remark}}" required></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
+      {%endif%}
+      {%endfor%}
     </tbody>
   </table>
   <button type="button" onclick="addRow('othersTable')">Add Other</button>

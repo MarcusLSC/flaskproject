@@ -229,6 +229,7 @@ class Remarks(db.Model):
 
 class Assessments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id', ondelete='CASCADE'), nullable=False)
     remark_id = db.Column(db.Integer, db.ForeignKey('remarks.id', ondelete='CASCADE'), nullable=False)
     full_mark = db.Column(db.Integer, nullable=False, default=100)
@@ -254,19 +255,25 @@ class Students(db.Model):
     
 #grade tables
 class Grade_assessment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sid = db.Column(db.String(100), db.ForeignKey('students.sid', ondelete='CASCADE') , nullable=False)
+    sid = db.Column(db.String(100), primary_key=True)
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id', ondelete='CASCADE'), nullable=False)
-    assessment_id = db.Column(db.Integer, db.ForeignKey('assessments.id', ondelete='CASCADE'), nullable=False)
+    assessment_id = db.Column(db.Integer, primary_key=True)
     grade = db.Column(db.Float)
     transformedgrade = db.Column(db.Float)
+    __table_args__ = (
+        db.ForeignKeyConstraint(['sid'], ['students.sid'], ondelete='CASCADE'),
+        db.ForeignKeyConstraint(['assessment_id'], ['assessments.id'], ondelete='CASCADE')
+    )
 
 class Grade_remark(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sid = db.Column(db.String(100), db.ForeignKey('students.sid', ondelete='CASCADE'), nullable=False)
+    sid = db.Column(db.String(100), primary_key=True)
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id', ondelete='CASCADE'), nullable=False)
-    remark_id = db.Column(db.Integer, db.ForeignKey('remarks.id', ondelete='CASCADE'), nullable=False)
+    remark_id = db.Column(db.Integer, primary_key=True)
     grade = db.Column(db.Float)
+    __table_args__ = (
+        db.ForeignKeyConstraint(['sid'], ['students.sid'], ondelete='CASCADE'),
+        db.ForeignKeyConstraint(['remark_id'], ['remarks.id'], ondelete='CASCADE')
+    )
 
 #if True: #This line is for testing purposes
 if FirstTimeConnectionToDatabase:
