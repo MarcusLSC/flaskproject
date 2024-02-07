@@ -84,6 +84,14 @@
 </div></div>
 </div></div>  </div></td><td><div class="container"><br><h1>Subject</h1>
 	<br/><br/>
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{message}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div> 
+    {% endfor %}
 	<form id="form1" method="POST">
 		{{form1.hidden_tag()}}
 		<!-- Form1 fields and elements -->
@@ -99,7 +107,7 @@
 	<form id="form2" method="POST">
 		{{form2.hidden_tag()}}
 		{{form2.SubjectName.label}}
-		{{form2.SubjectName()}}
+		{{form2.SubjectName( value=)}}
 		<br><h2>Remarks Section</h2>
         {%for remark in remarks%}
 	<div id="remarkContainer">
@@ -124,10 +132,10 @@
       {%for assessment in assessments%}
       {%if assessment.assessment_type == "assignment"%}
       <tr>
-        <td><input type="text" name="assignmentName[]" value="{{assessment.name}}" required></td>
-        <td><input type="text" name="assignmentRelationWithRemark[]" value="{{assessment.remark_id.content}}" required></td>
-        <td><input type="number" name="assignmentFullMark[]" value="{{assessment.full_mark}}" required></td>
-        <td><input type="number" name="assignmentContribution[]" value="{{assessment.percentage_to_remark}}" required></td>
+        <td><input type="text" name="assignmentName[]" value="{{assessment.name}}" ></td>
+        <td><input type="text" name="assignmentRelationWithRemark[]" value="{{assessment.remark_id.content}}" ></td>
+        <td><input type="number" name="assignmentFullMark[]" value="{{assessment.full_mark}}" ></td>
+        <td><input type="number" name="assignmentContribution[]" value="{{assessment.percentage_to_remark}}" ></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
       {%endif%}
@@ -151,10 +159,10 @@
     </thead>
     <tbody>
       <tr>
-        <td><input type="text" name="quizzesName[]" value="{{assessment.name}}" required></td>
-        <td><input type="text" name="quizzesRelationWithRemark[]" value="{{assessment.remark_id.content}}" required></td>
-        <td><input type="number" name="quizzesFullMark[]" value="{{assessment.full_mark}}" required></td>
-        <td><input type="number" name="quizzesContribution[]" value="{{assessment.percentage_to_remark}}" required></td>
+        <td><input type="text" name="quizzesName[]" value="{{assessment.name}}"></td>
+        <td><input type="text" name="quizzesRelationWithRemark[]" value="{{assessment.remark_id.content}}" ></td>
+        <td><input type="number" name="quizzesFullMark[]" value="{{assessment.full_mark}}" ></td>
+        <td><input type="number" name="quizzesContribution[]" value="{{assessment.percentage_to_remark}}" ></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
       {%endif%}
@@ -178,10 +186,10 @@
         {%for assessment in assessments%}
       {%if assessment.assessment_type == "exam"%}
       <tr>
-        <td><input type="text" name="examinationName[]" value="{{assessment.name}}" required></td>
-        <td><input type="text" name="examinationRelationWithRemark[]" value="{{assessment.remark_id.content}}" required></td>
-        <td><input type="number" name="examinationFullMark[]" value="{{assessment.full_mark}}" required></td>
-        <td><input type="number" name="examinationContribution[]" value="{{assessment.percentage_to_remark}}" required></td>
+        <td><input type="text" name="examinationName[]" value="{{assessment.name}}"></td>
+        <td><input type="text" name="examinationRelationWithRemark[]" value="{{assessment.remark_id.content}}"></td>
+        <td><input type="number" name="examinationFullMark[]" value="{{assessment.full_mark}}"></td>
+        <td><input type="number" name="examinationContribution[]" value="{{assessment.percentage_to_remark}}"></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
       {%endif%}
@@ -205,10 +213,10 @@
     </thead>
     <tbody>
       <tr>
-        <td><input type="text" name="othersName[]" value="{{assessment.name}}" required></td>
-        <td><input type="text" name="othersRelationWithRemark[]" value="{{assessment.remark_id.content}}" required></td>
-        <td><input type="number" name="othersFullMark[]" value="{{assessment.full_mark}}" required></td>
-        <td><input type="number" name="othersContribution[]" value="{{assessment.percentage_to_remark}}" required></td>
+        <td><input type="text" name="othersName[]" value="{{assessment.name}}" ></td>
+        <td><input type="text" name="othersRelationWithRemark[]" value="{{assessment.remark_id.content}}" ></td>
+        <td><input type="number" name="othersFullMark[]" value="{{assessment.full_mark}}" ></td>
+        <td><input type="number" name="othersContribution[]" value="{{assessment.percentage_to_remark}}"></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
       {%endif%}
@@ -222,7 +230,7 @@
 </form>
 </div></div>
 <br><p>
-	Note: The subjects will be displayed in the report in the order they are addded
+	Note: The subjects will be displayed in the report in the order they are added
 </p><br>
 	
 </td></tr></table>

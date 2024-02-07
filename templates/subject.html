@@ -64,14 +64,7 @@
 	  </script>
 </head>
 <body>
-  {% for message in get_flashed_messages() %}
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            {{message}}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div> 
-    {% endfor %}
+  
 <table>
 <div class="textstyle1">
 <div id="container_3a151bc"><div id="container_3a151bc_padding" ><div class="textstyle1">  <span class="textstyle2">&#31185;&#30446;</span>
@@ -84,15 +77,25 @@
 </div></div>
 </div></div>  </div></td><td><div class="container"><br><h1>Subject</h1>
 	<br/><br/>
+  {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{message}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div> 
+    {% endfor %}
 	<form id="form1" method="POST">
 		{{form1.hidden_tag()}}
 		<!-- Form1 fields and elements -->
+    <input type="hidden" name="form_identifier" value="form1">
 		<select id="selectField" name="selectField" onchange="this.form.submit()">
 			{% for subject in subjects %}
 				<option value="{{ subject.id }}">{{ subject.name }}</option>
 			{% endfor %}
 			<option value="new">Create New Subject</option>
 		</select>
+    
 	</form>
 	<br/>
 	<div class="container">
@@ -120,10 +123,10 @@
     </thead>
     <tbody>
       <tr>
-        <td><input type="text" name="assignmentName[]" required></td>
-        <td><input type="text" name="assignmentRelationWithRemark[]" required></td>
-        <td><input type="number" name="assignmentFullMark[]" required></td>
-        <td><input type="number" name="assignmentContribution[]" required></td>
+        <td><input type="text" name="assignmentName[]" ></td>
+        <td><input type="text" name="assignmentRelationWithRemark[]" ></td>
+        <td><input type="number" name="assignmentFullMark[]" ></td>
+        <td><input type="number" name="assignmentContribution[]" ></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
     </tbody>
@@ -143,10 +146,10 @@
     </thead>
     <tbody>
       <tr>
-        <td><input type="text" name="quizzesName[]" required></td>
-        <td><input type="text" name="quizzesRelationWithRemark[]" required></td>
-        <td><input type="number" name="quizzesFullMark[]" required></td>
-        <td><input type="number" name="quizzesContribution[]" required></td>
+        <td><input type="text" name="quizzesName[]" ></td>
+        <td><input type="text" name="quizzesRelationWithRemark[]" ></td>
+        <td><input type="number" name="quizzesFullMark[]" ></td>
+        <td><input type="number" name="quizzesContribution[]" ></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
     </tbody>
@@ -166,10 +169,10 @@
     </thead>
     <tbody>
       <tr>
-        <td><input type="text" name="examinationName[]" required></td>
-        <td><input type="text" name="examinationRelationWithRemark[]" required></td>
-        <td><input type="number" name="examinationFullMark[]" required></td>
-        <td><input type="number" name="examinationContribution[]" required></td>
+        <td><input type="text" name="examinationName[]" ></td>
+        <td><input type="text" name="examinationRelationWithRemark[]" ></td>
+        <td><input type="number" name="examinationFullMark[]" ></td>
+        <td><input type="number" name="examinationContribution[]" ></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
     </tbody>
@@ -189,10 +192,10 @@
     </thead>
     <tbody>
       <tr>
-        <td><input type="text" name="othersName[]" required></td>
-        <td><input type="text" name="othersRelationWithRemark[]" required></td>
-        <td><input type="number" name="othersFullMark[]" required></td>
-        <td><input type="number" name="othersContribution[]" required></td>
+        <td><input type="text" name="othersName[]" ></td>
+        <td><input type="text" name="othersRelationWithRemark[]" ></td>
+        <td><input type="number" name="othersFullMark[]" ></td>
+        <td><input type="number" name="othersContribution[]" ></td>
         <td><button type="button" onclick="removeRow(this)">Remove</button></td>
       </tr>
     </tbody>
@@ -200,11 +203,12 @@
   <button type="button" onclick="addRow('othersTable')">Add Other</button>
 
   <br><br>
+  <input type="hidden" name="form_identifier" value="form2">
   <input type="submit" value="Save">
 </form>
 </div></div>
 <br><p>
-	Note: The subjects will be displayed in the report in the order they are addded
+	Note: The subjects will be displayed in the report in the order they are added
 </p><br>
 	
 </td></tr></table>
