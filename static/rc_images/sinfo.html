@@ -8,6 +8,16 @@
 	<link rel="stylesheet" type="text/css" href="/static/styles/sinfo_html.css">
 </head>
 <body>
+	{% for message in get_flashed_messages() %}
+        <div class="alert alert-primary alert-dismissible fade show" role="alert">
+            {{message}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+ 
+        
+    {% endfor %}
 <div class="textstyle1">
 <div id="container_21c46e0d"><div id="container_21c46e0d_padding" ><div class="textstyle1">  <span class="textstyle2">&#23416;&#29983;&#36039;&#26009;</span>
 </div>

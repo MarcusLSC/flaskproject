@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, request, redirect, url_for
+from flask import Flask, render_template, flash, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, Text
 from sqlalchemy_utils import database_exists, create_database
@@ -56,12 +56,13 @@ class updateUserForm(FlaskForm):
     update = SubmitField("Update")
 
 def get_SubjectChoices_from_database():
-    subjects = Subjects.query.order_by(Subjects.id).all()
+    subjects = Subjects.query.all()
     choices = [(subject.id, subject.name) for subject in subjects]
+    choices.insert(0, ('new', 'Create a New Subject'))
     return choices
 
 class SelectSubjectForm(FlaskForm):
-    SubjectSelect = SelectField('Select a Subject: ')
+    SubjectSelect = SelectField('Select a Subject: ', default='')
     
     def update_choices(self):
         self.SubjectSelect.choices = get_SubjectChoices_from_database()
@@ -111,58 +112,67 @@ def loadScoreEntryPage():
 @app.route('/subject.html', methods=["GET","POST"])
 def loadSubjectPage():
     form1 = SelectSubjectForm()
+    subjects = Subjects.query.all()
+    choices = [(subject.id, subject.name) for subject in subjects]
     form1.update_choices()
     form2 = SubjectForm()
     RequiredSubject = None
     form2.SubjectName.data=''
+    previous_value = session.get('previous_value')
+    form1.SubjectSelect.data=previous_value
     if form1.validate_on_submit():
         if request.method == "POST":
             form_identifier = request.form.get("form_identifier")
 
             if form_identifier == "form1":
                 selected_subject = form1.SubjectSelect.data
-    
-                if selected_subject == 'new':
+                session['previous_value'] = selected_subject
+                
+                if selected_subject != 'new':
+                    form1.SubjectSelect.data=selected_subject
+                    RequiredSubject = Subjects.query.filter_by(id=selected_subject).first()
+                    InfoforRemark = Remarks.query.filter_by(subject_id=RequiredSubject.id).order_by(Remarks.id)
+                    InfoforAssessment = Assessments.query.filter_by(subject_id=RequiredSubject.id).order_by(Assessments.id)
+                    form2.SubjectName.data=RequiredSubject.name
+                    return render_template("asubject.html",form1=form1,form2=form2, remarks=InfoforRemark, assessments=InfoforAssessment, name=RequiredSubject.name)
+
+            if form_identifier =="form2":
+                if previous_value == 'new':
                     # Handle the case where the user wants to create a new subject
                     # Redirect to a form for creating a new subject
                     if form2.validate_on_submit():
-                        if request.method == "POST":
-                            form_identifier = request.form.get("form_identifier")
-
-                            if form_identifier == "form2":
-                                NewSubjectName=form2.SubjectName.data
-                                NewSubject = Subjects(name=NewSubjectName)
+                        NewSubjectName=form2.SubjectName.data
+                        NewSubject = Subjects(name=NewSubjectName)
+                        try:
+                            db.session.add(NewSubject)
+                            db.session.flush()
+                            remarks = request.form.getlist('remarks[]')
+                            for remark in remarks:
+                                NewRemark=Remarks(subject_id=NewSubject.id, content=remark)
                                 try:
-                                    db.session.add(NewSubject)
-                                    db.session.commit()
-                                    ReqSubject=Subjects.query.filter_by(name=NewSubjectName).first()
-                                    remarks = request.form.getlist('remarks[]')
-                                    for remark in remarks:
-                                        NewRemark=Remarks(subject_id=ReqSubject.id, content=remark)
-                                        try:
                                             db.session.add(NewRemark)
-                                            db.session.commit()    
-                                        except:
+                                            db.session.flush()    
+                                except:
                                             flash("Error, remarks is not saved")
                                             print("Error, remarks is not saved")
-                                            return render_template("subject.html",form1=form1,form2=form2)
-                                    ReqRemarks=Remarks.query.filter_by(name=NewSubjectName).order_by(remark.id)
-                                    assignments_names = request.form.getlist('assignmentName[]')
-                                    assignment_relations = request.form.getlist('assignmentRelationWithRemark[]')
-                                    assignment_full_marks = request.form.getlist('assignmentFullMark[]')
-                                    assignment_contributions = request.form.getlist('assignmentContribution[]')
-                                    if assignments_names != None:
-                                        for ReqRemark in ReqRemarks:
-                                            for name, relation, full_mark, contribution in zip(assignments_names, assignment_relations, assignment_full_marks, assignment_contributions):
-                                                if ReqRemark.content == relation:
-                                                    NewAssessment = Assessments(name=name, subject_id=ReqSubject.id, remark_id=ReqRemark.id, full_mark=full_mark, percentage_to_remark=contribution, assessment_type="assignment")
-                                                    try:
+                                            return render_template("subject.html",form1=form1,form2=form2,choices = choices)
+                                ReqRemarks=Remarks.query.filter_by(name=NewSubjectName).order_by(remark.id)
+                                assignments_names = request.form.getlist('assignmentName[]')
+                                assignment_relations = request.form.getlist('assignmentRelationWithRemark[]')
+                                assignment_full_marks = request.form.getlist('assignmentFullMark[]')
+                                assignment_contributions = request.form.getlist('assignmentContribution[]')
+                                if assignments_names != None:
+                                    for ReqRemark in ReqRemarks:
+                                        for name, relation, full_mark, contribution in zip(assignments_names, assignment_relations, assignment_full_marks, assignment_contributions):
+                                            if ReqRemark.content == relation:
+                                                NewAssessment = Assessments(name=name, subject_id=NewSubject.id, remark_id=ReqRemark.id, full_mark=full_mark, percentage_to_remark=contribution, assessment_type="assignment")
+                                                try:
                                                         db.session.add(NewAssessment)
-                                                        db.session.commit()    
-                                                    except:
+                                                        db.session.flush()    
+                                                except:
                                                         flash("Error, assignment is not saved")
                                                         print("Error, assignment is not saved")
-                                                        return render_template("subject.html",form1=form1,form2=form2)
+                                                        return render_template("subject.html",form1=form1,form2=form2,choices = choices)
                                     quiz_names = request.form.getlist('quizName[]')
                                     quiz_relations = request.form.getlist('quizRelationWithRemark[]')
                                     quiz_full_marks = request.form.getlist('quizFullMark[]')
@@ -171,10 +181,10 @@ def loadSubjectPage():
                                         for ReqRemark in ReqRemarks:
                                             for name, relation, full_mark, contribution in zip(quiz_names, quiz_relations, quiz_full_marks, quiz_contributions):
                                                 if ReqRemark.content == relation:
-                                                    NewAssessment = Assessments(name=name, subject_id=ReqSubject.id, remark_id=ReqRemark.id, full_mark=full_mark, percentage_to_remark=contribution, assessment_type="quiz")
+                                                    NewAssessment = Assessments(name=name, subject_id=NewSubject.id, remark_id=ReqRemark.id, full_mark=full_mark, percentage_to_remark=contribution, assessment_type="quiz")
                                                     try:
                                                         db.session.add(NewAssessment)
-                                                        db.session.commit()    
+                                                        db.session.flush()    
                                                     except:
                                                         flash("Error, quiz is not saved")
                                                         print("Error, quiz is not saved")
@@ -187,14 +197,14 @@ def loadSubjectPage():
                                         for ReqRemark in ReqRemarks:
                                             for name, relation, full_mark, contribution in zip(examination_names, examination_relations, examination_full_marks, examination_contributions):
                                                 if ReqRemark.content == relation:
-                                                    NewAssessment = Assessments(name=name, subject_id=ReqSubject.id, remark_id=ReqRemark.id, full_mark=full_mark, percentage_to_remark=contribution, assessment_type="exam")
+                                                    NewAssessment = Assessments(name=name, subject_id=NewSubject.id, remark_id=ReqRemark.id, full_mark=full_mark, percentage_to_remark=contribution, assessment_type="exam")
                                                     try:
                                                         db.session.add(NewAssessment)
-                                                        db.session.commit()    
+                                                        db.session.flush()    
                                                     except:
                                                         flash("Error, exam is not saved")
                                                         print('Error, exam is not saved')
-                                                        return render_template("subject.html",form1=form1,form2=form2)
+                                                        return render_template("subject.html",form1=form1,form2=form2,choices = choices)
                                     other_names = request.form.getlist('otherName[]')
                                     other_relations = request.form.getlist('otherRelationWithRemark[]')
                                     other_full_marks = request.form.getlist('otherFullMark[]')
@@ -203,29 +213,25 @@ def loadSubjectPage():
                                         for ReqRemark in ReqRemarks:
                                             for name, relation, full_mark, contribution in zip(other_names, other_relations, other_full_marks, other_contributions):
                                                 if ReqRemark.content == relation:
-                                                    NewAssessment = Assessments(name=name, subject_id=ReqSubject.id, remark_id=ReqRemark.id, full_mark=full_mark, percentage_to_remark=contribution, assessment_type="other")
+                                                    NewAssessment = Assessments(name=name, subject_id=NewSubject.id, remark_id=ReqRemark.id, full_mark=full_mark, percentage_to_remark=contribution, assessment_type="other")
                                                     try:
                                                         db.session.add(NewAssessment)
-                                                        db.session.commit()    
+                                                        db.session.flush()    
                                                     except:
                                                         flash("Error, others item is not saved")
                                                         print("Error, others item is not saved")
-                                                        return render_template("subject.html",form1=form1,form2=form2)
+                                                        return render_template("subject.html",form1=form1,form2=form2,choices = choices)
+                                    db.session.commit()
                                     flash("Subject added successfully")
                                     print("Subject added successfully")
-
-                                except:
-                                    flash("Error, subject is not saved")
-                                    print("Error, subject is not saved")
-                                    return render_template("subject.html",form1=form1,form2=form2)
-                            form1.update_choices()                
-                            return render_template("subject.html",form1=form1,form2=form2)
-        else:
-            RequiredSubject = Subjects.query.filter_by(id=selected_subject).first()
-            InfoforRemark = Remarks.query.filter_by(subject_id=RequiredSubject.id).order_by(Remarks.id)
-            InfoforAssessment = Assessments.query.filter_by(subject_id=RequiredSubject.id).order_by(Assessments.id)
-            return render_template("asubject.html",form1=form1,form2=form2, remarks=InfoforRemark, assessments=InfoforAssessment, name=RequiredSubject.name)
-    return render_template("subject.html",form1=form1,form2=form2)
+                        except:
+                                flash("Error, subject is not saved")
+                                print("Error, subject is not saved")
+                                return render_template("subject.html",form1=form1,form2=form2,choices = choices)
+                        form1.update_choices()                
+                        return render_template("subject.html",form1=form1,form2=form2,choices = choices)
+    return render_template("subject.html",form1=form1,form2=form2,choices = choices)    
+    
 
 @app.route('/statistics.html')
 def loadStatisticsPage():

@@ -88,14 +88,14 @@
 	<form id="form1" method="POST">
 		{{form1.hidden_tag()}}
 		<!-- Form1 fields and elements -->
+    {{form1.SubjectSelect.label}}
     <input type="hidden" name="form_identifier" value="form1">
-		<select id="selectField" name="selectField" onchange="this.form.submit()">
-			{% for subject in subjects %}
-				<option value="{{ subject.id }}">{{ subject.name }}</option>
+		<select id="selectField" name="selectField" >
+			{% for choice in form1.SubjectSelect.choices %}
+			<option value="{{ choice[0] }}">{{ choice[1] }}</option>
 			{% endfor %}
-			<option value="new">Create New Subject</option>
 		</select>
-    
+    <button type="submit">Select</button>
 	</form>
 	<br/>
 	<div class="container">

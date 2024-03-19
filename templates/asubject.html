@@ -92,22 +92,24 @@
             </button>
         </div> 
     {% endfor %}
-	<form id="form1" method="POST">
-		{{form1.hidden_tag()}}
-		<!-- Form1 fields and elements -->
-		<select id="selectField" name="selectField" onchange="this.form.submit()">
-			{% for subject in subjects %}
-				<option value="{{ subject.id }}">{{ subject.name }}</option>
-			{% endfor %}
-			<option value="new">Create New Subject</option>
-		</select>
-	</form>
+    <form id="form1" method="POST">
+      {{form1.hidden_tag()}}
+      <!-- Form1 fields and elements -->
+      {{form1.SubjectSelect.label}}
+      <input type="hidden" name="form_identifier" value="form1">
+      <select id="selectField" name="selectField" >
+        {% for choice in form1.SubjectSelect.choices %}
+        <option value="{{ choice[0] }}">{{ choice[1] }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Select</button>
+    </form>
 	<br/>
 	<div class="container">
 	<form id="form2" method="POST">
 		{{form2.hidden_tag()}}
 		{{form2.SubjectName.label}}
-		{{form2.SubjectName( value=)}}
+		{{form2.SubjectName(value=name)}}
 		<br><h2>Remarks Section</h2>
         {%for remark in remarks%}
 	<div id="remarkContainer">
